@@ -1,12 +1,14 @@
 import React, {useEffect, useState} from 'react'
 import axios from 'axios';
 import { useNavigate, useParams } from 'react-router-dom';
+import Swal from 'sweetalert2';
 
 
 const FormEditProduct = () => {
 
     const [name, setName] = useState("");
     const [price, setPrice] = useState("");
+    const [image, setImage] = useState(null);
     const [msg, setMsg] = useState("");
     const {id} = useParams();
 
@@ -18,6 +20,7 @@ const FormEditProduct = () => {
                 const response = await axios.get(`http://localhost:5000/products/${id}`);
                 setName(response.data.name)
                 setPrice(response.data.price)
+                setImage(response.data.image)
             } catch (error) {
                 if(error.response) {
                     setMsg(error.respone.data.msg)
@@ -29,16 +32,33 @@ const FormEditProduct = () => {
 
     const updateProduct = async (e) => {
         e.preventDefault();
+        const formData = new FormData();
+        formData.append('name', name);
+        formData.append('price', price);
+        if (image) {
+            formData.append('image', image); // Tambahkan gambar jika ada
+        }
+    
         try {
-            await axios.patch(`http://localhost:5000/products/${id}`, {
-                name: name,
-                price: price
+            await axios.patch(`http://localhost:5000/products/${id}`, formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data' // Tentukan tipe konten
+                }
             });
-            navigate('/products')
+            Swal.fire({
+                position: "center",
+                icon: "success",
+                title: "Your Update has been saved",
+                showConfirmButton: false,
+                timer: 1300
+            });
+            navigate('/products');
         } catch (error) {
-            if(error.response) {
-                setMsg(error.respone.data.msg)
-            }   
+            if (error.response) {
+                setMsg(error.response.data.msg);
+            } else {
+                setMsg("Something went wrong!");
+            }
         }
     }
 
@@ -73,6 +93,17 @@ const FormEditProduct = () => {
                                 onChange={(e) => setPrice(e.target.value)}/>
                             </div>
                         </div>
+                        <div className="field">
+                                <label className="label">Image</label>
+                                <div className="control">
+                                    <input
+                                        type="file"
+                                        className="input"
+                                        accept="image/*"
+                                        onChange={(e) => setImage(e.target.files[0])} // Mengambil file gambar
+                                    />
+                                </div>
+                            </div>
                         <div className="field ">
                             <div className="control">
                                <button type='submit' className="button is-link">Update</button>

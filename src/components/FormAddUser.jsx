@@ -1,6 +1,7 @@
 import React,{useState} from 'react'
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import Swal from 'sweetalert2';
 
 const FormAddUser = () => {
 
@@ -8,7 +9,7 @@ const FormAddUser = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [confPassword, setConfPassword] = useState("");
-    const [role, setRole] = useState("");
+    const [role, setRole] = useState("admin");
     const [msg, setMsg] = useState("");
 
     const navigate = useNavigate()
@@ -22,6 +23,13 @@ const FormAddUser = () => {
                 password: password,
                 confPassword: confPassword,
                 role: role
+            });
+            Swal.fire({
+                position: "center",
+                icon: "success",
+                title: "Your work has been saved",
+                showConfirmButton: false,
+                timer: 1500
             });
             navigate('/users')
         } catch (error) {

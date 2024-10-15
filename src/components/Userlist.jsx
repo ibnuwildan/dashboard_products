@@ -16,8 +16,8 @@ const Userlist = () => {
       const response = await axios.get('http://localhost:5000/users'); // Ambil data pengguna dari API
       console.log("Data yang diterima:", response.data); // Log data yang diterima
       // Periksa apakah data yang diterima adalah array
-      if (Array.isArray(response.data.response)) {
-        setUsers(response.data.response); // Set data pengguna jika dalam format array
+      if (Array.isArray(response.data)) {
+        setUsers(response.data); 
       } else {
         console.error("Data yang diterima bukan array:", response.data);
         setUsers([]); // Jika bukan array, set ke array kosong
@@ -28,7 +28,7 @@ const Userlist = () => {
   };
 
   const deleteUser = async (userId) => {
-    await axios.delete(`http://localhost:5000/users/${userId}`);
+    // Tampilkan SweetAlert konfirmasi
     Swal.fire({
       title: "Are you sure?",
       text: "You won't be able to revert this!",
@@ -37,18 +37,30 @@ const Userlist = () => {
       confirmButtonColor: "#3085d6",
       cancelButtonColor: "#d33",
       confirmButtonText: "Yes, delete it!"
-    }).then((result) => {
+    }).then(async (result) => {
       if (result.isConfirmed) {
-        Swal.fire({
-          title: "Deleted!",
-          text: "Your file has been deleted.",
-          icon: "success"
-        });
+        // Jika pengguna mengonfirmasi, lakukan penghapusan
+        try {
+          await axios.delete(`http://localhost:5000/users/${userId}`);
+          Swal.fire({
+            title: "Deleted!",
+            text: "Your file has been deleted.",
+            icon: "success"
+          });
+          // Memanggil fungsi untuk memperbarui daftar pengguna
+          getUsers();
+        } catch (error) {
+          console.error("Error deleting user:", error);
+          Swal.fire({
+            title: "Error!",
+            text: "There was an error deleting the user.",
+            icon: "error"
+          });
+        }
       }
-      getUsers();
     });
-  }
-
+  };
+  
   return (
     <div>
         <h1 className='title'>Users</h1>
